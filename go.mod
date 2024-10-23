@@ -1,4 +1,4 @@
-module sorting
+module my-sorting
 
 go 1.22.2
 
