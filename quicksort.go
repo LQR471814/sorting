@@ -8,6 +8,8 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+var debugLog bool
+
 func testIndices[T any](arr []T, indices ...int) {
 	for i, idx := range indices {
 		assert.Lt(idx, len(arr), fmt.Sprintf("idx #%d not < len(arr)", i))
@@ -16,6 +18,13 @@ func testIndices[T any](arr []T, indices ...int) {
 }
 
 func QuicksortPartition[T constraints.Ordered](arr []T, firstIdx, lastIdx int) int {
+	if len(arr) == 0 {
+		return -1
+	}
+	if firstIdx == lastIdx {
+		return -1
+	}
+
 	pivot := arr[(firstIdx+lastIdx)/2]
 	left := firstIdx
 	right := lastIdx
@@ -23,6 +32,25 @@ func QuicksortPartition[T constraints.Ordered](arr []T, firstIdx, lastIdx int) i
 	testIndices(arr, firstIdx, lastIdx)
 
 	for {
+		if debugLog {
+			for i := firstIdx; i <= lastIdx; i++ {
+				fmt.Printf("%-3v", arr[i])
+			}
+			fmt.Println()
+			for i := firstIdx; i <= lastIdx; i++ {
+				if i == left {
+					fmt.Print("L  ")
+					continue
+				}
+				if i == right {
+					fmt.Print("R  ")
+					continue
+				}
+				fmt.Print("   ")
+			}
+			fmt.Println()
+		}
+
 		for arr[left] < pivot {
 			left++
 		}
@@ -32,8 +60,6 @@ func QuicksortPartition[T constraints.Ordered](arr []T, firstIdx, lastIdx int) i
 		if left >= right {
 			break
 		}
-
-		fmt.Printf("%v L[%d] R[%d] %v < %v; %v > %v\n", arr, left, right, arr[left], pivot, arr[right], pivot)
 
 		originalLeft := arr[left]
 		arr[left] = arr[right]
@@ -47,10 +73,12 @@ func QuicksortPartition[T constraints.Ordered](arr []T, firstIdx, lastIdx int) i
 		pivotIdx = left
 	}
 
-	fmt.Println(arr, pivotIdx)
+	if debugLog {
+		fmt.Println("PARTITION RESULT", arr, pivotIdx)
+	}
 	assert.Equal(arr[pivotIdx], pivot, "final idx value != pivot value")
 
-	return right + 1
+	return pivotIdx
 }
 
 func Quicksort[T constraints.Ordered](arr []T, firstIdx, lastIdx int) {
