@@ -1,7 +1,6 @@
 package sorting
 
 import (
-	"fmt"
 	"math/rand"
 	"testing"
 
@@ -13,13 +12,21 @@ func init() {
 	debugLog = true
 }
 
-func verifyPartition[T constraints.Ordered](t *testing.T, pivotLoc int, arr []T) {
+func verifyPartition[T constraints.Ordered](t *testing.T, pivot T, arr []T) {
+	pivotIdx := 0
 	for i, v := range arr {
-		if i < pivotLoc {
-			require.Less(t, v, arr[pivotLoc], "left partition not less than pivot")
+		if v == pivot {
+			pivotIdx = i
+			break
 		}
-		if i > pivotLoc {
-			require.Greater(t, v, arr[pivotLoc], "right partition not greater than pivot")
+	}
+
+	for i, v := range arr {
+		if i < pivotIdx {
+			require.Less(t, v, pivot, "left partition not less than pivot")
+		}
+		if i > pivotIdx {
+			require.Greater(t, v, pivot, "right partition not greater than pivot")
 		}
 	}
 }
@@ -35,26 +42,27 @@ func TestPartition(t *testing.T) {
 }
 
 func FuzzPartition(f *testing.F) {
-	source := rand.NewSource(123)
+	f.Add(int64(20))
+	f.Fuzz(func(t *testing.T, seed int64) {
+		source := rand.NewSource(seed)
 
-	f.Add(uint32(20))
-	f.Fuzz(func(t *testing.T, n uint32) {
-		n %= 20
-		if n == 0 {
-			return
-		}
-
-		inp := make([]int, n)
-		for i := 0; i < int(n); i++ {
+		inp := make([]int, 7)
+		for i := 0; i < len(inp); i++ {
 			inp[i] = int(source.Int63())
 		}
 
-		fmt.Print("---- Run ----\n\n")
-
-		pivot := QuicksortPartition(inp, 0, len(inp)-1)
+		pivot := inp[getPivotIdx(0, len(inp)-1)]
+		QuicksortPartition(inp, 0, len(inp)-1)
 		verifyPartition(t, pivot, inp)
 
-		fmt.Print("\n---- End ----\n\n")
+		inp = make([]int, 8)
+		for i := 0; i < len(inp); i++ {
+			inp[i] = int(source.Int63())
+		}
+
+		pivot = inp[getPivotIdx(0, len(inp)-1)]
+		QuicksortPartition(inp, 0, len(inp)-1)
+		verifyPartition(t, pivot, inp)
 	})
 }
 

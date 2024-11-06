@@ -2,6 +2,7 @@ package sorting
 
 import (
 	"fmt"
+	"strings"
 
 	"my-sorting/assert"
 
@@ -17,17 +18,18 @@ func testIndices[T any](arr []T, indices ...int) {
 	}
 }
 
+func getPivotIdx(firstIdx, lastIdx int) int {
+	return (firstIdx + lastIdx) / 2
+}
+
 func QuicksortPartition[T constraints.Ordered](arr []T, firstIdx, lastIdx int) int {
-	if len(arr) == 0 {
-		return -1
-	}
-	if firstIdx == lastIdx {
+	if len(arr) <= 2 {
 		return -1
 	}
 
-	pivot := arr[(firstIdx+lastIdx)/2]
-	left := firstIdx
-	right := lastIdx
+	pivot := arr[getPivotIdx(firstIdx, lastIdx)]
+	left := firstIdx - 1
+	right := lastIdx + 1
 
 	if debugLog {
 		fmt.Printf("PARTITION (pivot: %v, left_idx: %d, right_idx: %d)\n", pivot, firstIdx, lastIdx)
@@ -36,54 +38,51 @@ func QuicksortPartition[T constraints.Ordered](arr []T, firstIdx, lastIdx int) i
 	testIndices(arr, firstIdx, lastIdx)
 
 	for {
-		for arr[left] < pivot {
+		for {
 			left++
+			if arr[left] >= pivot {
+				break
+			}
 		}
-		for arr[right] > pivot {
+		for {
 			right--
+			if arr[right] <= pivot {
+				break
+			}
 		}
 
 		if debugLog {
+			lens := make([]int, lastIdx-firstIdx+1)
 			for i := firstIdx; i <= lastIdx; i++ {
-				fmt.Printf("%-3v", arr[i])
+				out := fmt.Sprint(arr[i]) + " "
+				lens[i] = len(out)
+				fmt.Print(out)
 			}
 			fmt.Println()
 			for i := firstIdx; i <= lastIdx; i++ {
 				if i == left {
-					fmt.Print("L  ")
+					fmt.Print("L" + strings.Repeat(" ", lens[i]-1))
 					continue
 				}
 				if i == right {
-					fmt.Print("R  ")
+					fmt.Print("R" + strings.Repeat(" ", lens[i]-1))
 					continue
 				}
-				fmt.Print("   ")
+				fmt.Print(strings.Repeat(" ", lens[i]))
 			}
 			fmt.Println()
 		}
 
 		if left >= right {
-			break
+			if debugLog {
+				fmt.Println("PARTITION RESULT", arr, right)
+			}
+
+			return right
 		}
 
-		originalLeft := arr[left]
-		arr[left] = arr[right]
-		arr[right] = originalLeft
-		left++
-		right--
+		arr[left], arr[right] = arr[right], arr[left]
 	}
-
-	pivotIdx := right
-	if arr[pivotIdx] != pivot {
-		pivotIdx = left
-	}
-
-	if debugLog {
-		fmt.Println("PARTITION RESULT", arr, pivotIdx)
-	}
-	assert.Equal(arr[pivotIdx], pivot, "final idx value != pivot value")
-
-	return pivotIdx
 }
 
 func Quicksort[T constraints.Ordered](arr []T, firstIdx, lastIdx int) {
