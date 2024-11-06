@@ -29,9 +29,20 @@ func QuicksortPartition[T constraints.Ordered](arr []T, firstIdx, lastIdx int) i
 	left := firstIdx
 	right := lastIdx
 
+	if debugLog {
+		fmt.Printf("PARTITION (pivot: %v, left_idx: %d, right_idx: %d)\n", pivot, firstIdx, lastIdx)
+	}
+
 	testIndices(arr, firstIdx, lastIdx)
 
 	for {
+		for arr[left] < pivot {
+			left++
+		}
+		for arr[right] > pivot {
+			right--
+		}
+
 		if debugLog {
 			for i := firstIdx; i <= lastIdx; i++ {
 				fmt.Printf("%-3v", arr[i])
@@ -51,12 +62,6 @@ func QuicksortPartition[T constraints.Ordered](arr []T, firstIdx, lastIdx int) i
 			fmt.Println()
 		}
 
-		for arr[left] < pivot {
-			left++
-		}
-		for arr[right] > pivot {
-			right--
-		}
 		if left >= right {
 			break
 		}

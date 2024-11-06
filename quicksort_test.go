@@ -37,12 +37,15 @@ func TestPartition(t *testing.T) {
 func FuzzPartition(f *testing.F) {
 	source := rand.NewSource(123)
 
-	f.Add(20)
-	f.Fuzz(func(t *testing.T, n int) {
+	f.Add(uint32(20))
+	f.Fuzz(func(t *testing.T, n uint32) {
 		n %= 20
+		if n == 0 {
+			return
+		}
 
 		inp := make([]int, n)
-		for i := 0; i < n; i++ {
+		for i := 0; i < int(n); i++ {
 			inp[i] = int(source.Int63())
 		}
 
