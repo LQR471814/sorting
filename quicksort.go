@@ -18,16 +18,11 @@ func testIndices[T any](arr []T, indices ...int) {
 	}
 }
 
-func getPivotIdx(firstIdx, lastIdx int) int {
-	return (firstIdx + lastIdx) / 2
-}
-
-func QuicksortPartition[T constraints.Ordered](arr []T, firstIdx, lastIdx int) int {
+func QuicksortPartition[T constraints.Ordered](arr []T, pivot T, firstIdx, lastIdx int) int {
 	if len(arr) <= 2 {
 		return -1
 	}
 
-	pivot := arr[getPivotIdx(firstIdx, lastIdx)]
 	left := firstIdx - 1
 	right := lastIdx + 1
 
@@ -92,7 +87,11 @@ func Quicksort[T constraints.Ordered](arr []T, firstIdx, lastIdx int) {
 
 	testIndices(arr, firstIdx, lastIdx)
 
-	newEnd := QuicksortPartition(arr, firstIdx, lastIdx)
+	pivot := arr[firstIdx]
+	newEnd := QuicksortPartition(arr, pivot, firstIdx, lastIdx)
+	if newEnd < 0 {
+		return
+	}
 	Quicksort(arr, firstIdx, newEnd-1)
 	Quicksort(arr, newEnd+1, lastIdx)
 }
